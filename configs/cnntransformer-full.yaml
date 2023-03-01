@@ -19,7 +19,7 @@ model: #  contains parameter settings for __init__() function of class with name
   }
 # Data parameters
 preprocess_func: "preprocess_cumsum" # name of a function defined in preprocess.py
-use_residual_weights: True # use residual composition matrix to compute turnover, short proportion, etc.
+use_residual_weights: False # use residual composition matrix to compute turnover, short proportion, etc.
 cap_proportion: 0.01 # defines asset universe: 0.01 corresponds to a residual data set
 factor_models: # number of factors per residual time series to test, for each factor model
   { "IPCA": [5], "PCA": [5], "FamaFrench": [5] }
@@ -35,7 +35,7 @@ num_epochs: 100
 optimizer_name: "Adam" # see PyTorch docs for potential optimizers
 optimizer_opts: # see PyTorch docs for optimizer options
   { lr: 0.001 }
-batch_size: 125
+batch_size: 15
 retrain_freq: 125 # if mode=='estimate', this is the number of obs used to form a test set (chronologically after the training set)
 rolling_retrain: True # set to False for no rolling retraining (i.e. train once, test for all data past training set)
 force_retrain: True # force the model to be trained, even if existing weights for the model are saved on disk
