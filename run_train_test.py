@@ -79,6 +79,7 @@ def run(config:dict,
     cap = config['cap_proportion']
     use_residual_weights = config['use_residual_weights']
     objective = config['objective']
+    cwd = os.getcwd()
 
     # set up data
     filepaths = []
@@ -92,9 +93,9 @@ def run(config:dict,
     for factor in factor_models["IPCA"]:
         im = 420 #initial months
         w = 20*12 #window size
-        filepaths += [f"/app/dlsa-public/residuals/{ipcadir}/{ipcartag}_{factor}_factors_{im}_initialMonths_{w}_window_12_reestimationFreq_{cap}_cap.npy"]
+        filepaths += [f"{cwd}/residuals/{ipcadir}/{ipcartag}_{factor}_factors_{im}_initialMonths_{w}_window_12_reestimationFreq_{cap}_cap.npy"]
         datanames += ['IPCA'+str(factor)]
-        residual_weightsNames += [f"/app/dlsa-public/residuals/{ipcadir}/{ipcamtag}_{factor}_factors_{im}_initialMonths_{w}_window_12_reestimationFreq_{cap}_cap.npy"]
+        residual_weightsNames += [f"{cwd}/residuals/{ipcadir}/{ipcamtag}_{factor}_factors_{im}_initialMonths_{w}_window_12_reestimationFreq_{cap}_cap.npy"]
     #PCA
     pcadir = "pca"
     pcartag = "AvPCA_OOSresiduals"
@@ -103,9 +104,9 @@ def run(config:dict,
         ioy = 1998
         w = 60
         cw = 252
-        filepaths += [f"/app/dlsa-public/residuals/{pcadir}/{pcartag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cw}_covWindow_{cap}_Cap.npy"]
+        filepaths += [f"{cwd}/residuals/{pcadir}/{pcartag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cw}_covWindow_{cap}_Cap.npy"]
         datanames += ['PCA'+str(factor)]
-        residual_weightsNames += [f"/app/dlsa-public/residuals/{pcadir}/{pcamtag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cw}_covWindow_{cap}_Cap.npy"]
+        residual_weightsNames += [f"{cwd}/residuals/{pcadir}/{pcamtag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cw}_covWindow_{cap}_Cap.npy"]
     #FamaFrench
     ffdir = "famafrench"
     ffrtag = "DailyFamaFrench_OOSresiduals"
@@ -113,13 +114,13 @@ def run(config:dict,
     for factor in factor_models["FamaFrench"]:
         ioy = 1998
         w = 60 
-        filepaths += [f"/app/dlsa-public/residuals/{ffdir}/{ffrtag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cap}_Cap.npy" ]
-        #filepaths += [f"/app/dlsa-public/residuals/ff-universe-residuals/ff-universe-residuals_{factor}_factors_1998_initialOOSYear_60_rollingWindow_0.01_Cap.npy" ]
+        filepaths += [f"{cwd}/residuals/{ffdir}/{ffrtag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cap}_Cap.npy" ]
+        #filepaths += [f"{cwd}/residuals/ff-universe-residuals/ff-universe-residuals_{factor}_factors_1998_initialOOSYear_60_rollingWindow_0.01_Cap.npy" ]
         datanames += ['FamaFrench'+str(factor)]
         #datanames += ['FamaFrenchNew'+str(factor)]
         # C:\Users\tonys\gdrive\coding\dlsa-public\residuals\famafrench\DailyFamaFrench_OOSresiduals_0_factors_1998_initialOOSYear_60_rollingWindow_0.01_Cap.npy.gz
-        residual_weightsNames += [f"/app/dlsa-public/residuals/{ffdir}/{ffmtag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cap}_Cap.npy" ]
-        #residual_weightsNames += [f"/app/dlsa-public/residuals/ff-universe-residuals/ff-universe-transition-matrices_{factor}_factors_1998_initialOOSYear_60_rollingWindow_0.01_Cap.npy" ]
+        residual_weightsNames += [f"{cwd}/residuals/{ffdir}/{ffmtag}_{factor}_factors_{ioy}_initialOOSYear_{w}_rollingWindow_{cap}_Cap.npy" ]
+        #residual_weightsNames += [f"{cwd}/residuals/ff-universe-residuals/ff-universe-transition-matrices_{factor}_factors_1998_initialOOSYear_60_rollingWindow_0.01_Cap.npy" ]
 
     # load dates
     dates_filepath = './data/F-F_Research_Data_5_Factors_2x3_daily.CSV'
