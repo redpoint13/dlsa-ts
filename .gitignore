@@ -1,9 +1,11 @@
 # Project-specific files
 daily-returns.csv
 *esiduals*.npy
+Weights*.npy
 *.npz
 credentials.yaml
 .vscode/
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -147,3 +149,5 @@ cython_debug/
 
 # Data related files
 data/*
+results/CNNTransformer/Checkpoint*.tar
+*.pickle
