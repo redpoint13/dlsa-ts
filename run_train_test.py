@@ -63,23 +63,25 @@ def run(config:dict,
     If gpu_device_ids is None, GPUs will automatically be selected. Set to a list of ints to use those device IDs (useful when automating calls to run() for e.g. grid search).
     If notification_phone_number is given and Twilio is set up, phone number will be sent an SMS upon completion of or exception in a trading policy test.
     """
-    model_name = config['model_name']
-    results_tag = config['results_tag']
-    debug = config['debug']
+    model_name = config['model_name'] # name of a class defined in models folder and initialized in model folder's __init__.py
+    results_tag = config['results_tag']  # optional; try not to use underscores in this tag, use dashes instead
+    debug = config['debug']   # set to True to turn on debug logging and file naming
+    
+    # start logging
     username, hostname, log_tag, starttime = configure_logging(model_name, run_id=run_id, debug=debug) \
                                             if run_id else initialize_logging(model_name, debug=debug) 
     
     # try:
     # TODO: add current git hash to config
     # use https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
-    logging.info(f"Config: \n{json.dumps(config, indent=2, sort_keys=False)}")
+    logging.info(f"Config: \n{json.dumps(config, indent=2, sort_keys=False)}")  #log config settings
     
     results_filename = f"results_{log_tag}_{results_tag}"
-    factor_models = config['factor_models']
-    cap = config['cap_proportion']
-    use_residual_weights = config['use_residual_weights']
-    objective = config['objective']
-    cwd = os.getcwd()
+    factor_models = config['factor_models'] # number of factors per residual time series to test, for each factor model
+    cap = config['cap_proportion'] # defines asset universe: 0.01 corresponds to a residual data set
+    use_residual_weights = config['use_residual_weights'] # use residual composition matrix to compute turnover, short proportion, etc.
+    objective = config['objective']  # objective function: 'sharpe' or 'meanvar' or 'sqrtMeanSharpe'
+    cwd = os.getcwd() # get current working directory
 
     # set up data
     filepaths = []
@@ -127,10 +129,11 @@ def run(config:dict,
     if not os.path.exists(dates_filepath):
         ff5 = pd.read_csv("https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip", header=2, index_col=0)
         ff5.to_csv(dates_filepath)
+    # divide all values in `dates_filepath` by 100 --> why?
     FamaFrenchDailyData = pd.read_csv(dates_filepath, index_col=0) / 100
     daily_dates = pd.to_datetime(
         FamaFrenchDailyData.index[(FamaFrenchDailyData.index > 19980000) & (FamaFrenchDailyData.index < 20170000)],
-        format ='%Y%m%d')
+        format ='%Y%m%d')  # 4,781 days in Ken French Factor file btwn 1/1/1998 & 12/31/2016
     del FamaFrenchDailyData
 
     # Test loop
@@ -145,6 +148,7 @@ def run(config:dict,
                 with open(filepath, 'wb') as f_out:
                     shutil.copyfileobj(f_in, f_out)
         residuals = np.load(filepath).astype(np.float32)
+        # perturbation of residual time series by noise is optional
         if 'perturbation' in config and len(config['perturbation']) > 0:
             logging.info(f"Before perturbing residuals: std: {np.std(residuals[residuals != 0]):0.4f}")
             residuals = perturb(residuals, config['perturbation'])
@@ -152,7 +156,7 @@ def run(config:dict,
         logging.info('Residuals loaded')
         residuals[np.isnan(residuals)] = 0
 
-        if use_residual_weights:
+        if use_residual_weights:  # How do original weights get created?
             logging.info('Loading residual composition matrix')
             residual_weight_marker = "__residual_weights"
             # residual_weights = np.load(residual_weightsNames[i]) #.astype(np.float32)
@@ -212,61 +216,63 @@ def run(config:dict,
         # https://gist.github.com/sparkydogX/845b658e3e6cef58a7bf706a9f43d7bf
         # log for debugging:  torch.cuda.memory_summary(device=None, abbreviated=False)
         logging.info(f"Running on devices {device_ids}")
-        if config['mode'] == 'test':
-            rets,sharpe,ret,std,turnover,short_proportion = test(residuals, 
-                                                                    daily_dates,
-                                                                    model,
-                                                                    preprocess,
-                                                                    config,
-                                                                    residual_weights = residual_weights,
-                                                                    save_params = True,
-                                                                    force_retrain = config['force_retrain'],
-                                                                    parallelize = True, 
-                                                                    log_dev_progress_freq = 10, 
-                                                                    log_plot_freq = 149, 
-                                                                    device = f'cuda:{device_ids[0]}', 
-                                                                    device_ids = device_ids,
-                                                                    output_path = outdir, 
-                                                                    num_epochs = config['num_epochs'], 
-                                                                    early_stopping = config['early_stopping'],
-                                                                    model_tag = model_tag, 
-                                                                    batchsize = config['batch_size'], 
-                                                                    retrain_freq = config['retrain_freq'], 
-                                                                    rolling_retrain = config['rolling_retrain'],
-                                                                    length_training = config['length_training'], 
-                                                                    lookback = config['model']['lookback'], 
-                                                                    trans_cost = config['trans_cost'], 
-                                                                    hold_cost = config['hold_cost'],
-                                                                    objective = config['objective'],
-                                                                    )
+        if config['mode'] == 'test': # can be 'test' or 'estimate'
+            rets,sharpe,ret,std,turnover,short_proportion = test(
+                residuals, 
+                daily_dates,
+                model,
+                preprocess,
+                config,
+                residual_weights = residual_weights,
+                save_params = True,
+                force_retrain = config['force_retrain'],
+                parallelize = True, 
+                log_dev_progress_freq = 10, 
+                log_plot_freq = 149, 
+                device = f'cuda:{device_ids[0]}', 
+                device_ids = device_ids,
+                output_path = outdir, 
+                num_epochs = config['num_epochs'], 
+                early_stopping = config['early_stopping'],
+                model_tag = model_tag, 
+                batchsize = config['batch_size'], 
+                retrain_freq = config['retrain_freq'], 
+                rolling_retrain = config['rolling_retrain'],
+                length_training = config['length_training'], 
+                lookback = config['model']['lookback'], 
+                trans_cost = config['trans_cost'], 
+                hold_cost = config['hold_cost'],
+                objective = config['objective'],
+                )
         elif config['mode'] == 'estimate':  # used to train a model once, e.g. for hyperparameter exploration on dev dataset
-            rets,sharpe,ret,std,turnover,short_proportion = estimate(residuals, 
-                                                                        daily_dates,
-                                                                        model,
-                                                                        preprocess,
-                                                                        config,
-                                                                        residual_weights = residual_weights,
-                                                                        save_params = True,
-                                                                        force_retrain = config['force_retrain'],
-                                                                        parallelize = True, 
-                                                                        log_dev_progress_freq = 10, 
-                                                                        log_plot_freq = 149, 
-                                                                        device = f'cuda:{device_ids[0]}', 
-                                                                        device_ids = device_ids,
-                                                                        output_path = outdir, 
-                                                                        num_epochs = config['num_epochs'], 
-                                                                        lr = config['learning_rate'], 
-                                                                        early_stopping = config['early_stopping'],
-                                                                        model_tag = model_tag, 
-                                                                        batchsize = config['batch_size'], 
-                                                                        length_training = config['length_training'], 
-                                                                        test_size = config['retrain_freq'], 
-                                                                        lookback = config['model']['lookback'], 
-                                                                        trans_cost = config['trans_cost'], 
-                                                                        hold_cost = config['hold_cost'],
-                                                                        objective = config['objective'],
-                                                                        )
-        else:
+            rets,sharpe,ret,std,turnover,short_proportion = estimate(
+                residuals, 
+                daily_dates,
+                model,
+                preprocess,
+                config,
+                residual_weights = residual_weights,
+                save_params = True,
+                force_retrain = config['force_retrain'],
+                parallelize = True, 
+                log_dev_progress_freq = 10, 
+                log_plot_freq = 149, 
+                device = f'cuda:{device_ids[0]}', 
+                device_ids = device_ids,
+                output_path = outdir, 
+                num_epochs = config['num_epochs'], 
+                lr = config['learning_rate'], 
+                early_stopping = config['early_stopping'],
+                model_tag = model_tag, 
+                batchsize = config['batch_size'], 
+                length_training = config['length_training'], 
+                test_size = config['retrain_freq'], 
+                lookback = config['model']['lookback'], 
+                trans_cost = config['trans_cost'], 
+                hold_cost = config['hold_cost'],
+                objective = config['objective'],
+                )
+else:
             raise Exception(f"Invalid mode '{config['mode']}'; must be either 'test' or 'estimate'")
 
         results_dict[model_tag] = {
