@@ -63,6 +63,7 @@ def run_famafrench():
         factors[i].index = factors[i].index.map(str)
 
     ff8 = pd.concat(factors, axis=1, join="inner")
+    print(f"ff8 columns are {ff8.columns.tolist()}")
     ff8.index = ff8.index.astype('int')
     ff8.rename(columns={col:col.strip() for col in ff8.columns}, inplace=True)
     ff8.drop(columns=['RF'], inplace=True)
