@@ -405,8 +405,8 @@ def get_returns(model,
            assets_to_trade)
 
 
-def test(Data, 
-         daily_dates,
+def test(Data, # aka residuals
+         daily_dates, # 4781 trading days btwn 1/1/1998 & 12/31/2016 inclusive
          model,
          preprocess,
          config,
@@ -417,10 +417,10 @@ def test(Data,
          save_params = True,
          device = 'cuda',
          output_path = os.path.join(os.getcwd(), 'results', 'Unknown'), model_tag = 'Unknown', 
-         lookback = 30, retrain_freq = 250, length_training = 1000, rolling_retrain = True,
+         lookback=30, retrain_freq=250, length_training=1000, rolling_retrain=True,
          parallelize = True, 
          device_ids=[0,1,2,3,4,5,6,7],  
-         trans_cost=0, hold_cost = 0,
+         trans_cost=0, hold_cost=0,
          force_retrain = False,
          objective = "sharpe",):
     
@@ -461,30 +461,31 @@ def test(Data,
         
         if rolling_retrain or t == 0:
             model_t = model(logdir=output_path, **config['model'])
-            rets_t,turns_t,shorts_t,weights_t,a2t = train(model_t,
-                                              preprocess = preprocess,
-                                              data_train = data_train_t, 
-                                              data_dev = data_test_t,  # dev dataset isn't used as we don't do any validation tuning, so test dataset goes here for progress reporting
-                                              residual_weights_train = residual_weights_train_t, 
-                                              residual_weights_dev = residual_weights_test_t,  # dev dataset isn't used as we don't do any validation tuning, so test dataset goes here for progress reporting
-                                              log_dev_progress_freq = log_dev_progress_freq, 
-                                              num_epochs = num_epochs, 
-                                              force_retrain = force_retrain,
-                                              optimizer_name = config['optimizer_name'],
-                                              optimizer_opts = config['optimizer_opts'],
-                                              early_stopping = early_stopping,
-                                              save_params = save_params, 
-                                              output_path = output_path, 
-                                              model_tag = model_tag_t,
-                                              device = device, 
-                                              lookback = lookback, 
-                                              log_plot_freq = log_plot_freq, 
-                                              parallelize = parallelize, 
-                                              device_ids = device_ids, 
-                                              batchsize = batchsize,
-                                              trans_cost = trans_cost,
-                                              hold_cost = hold_cost,
-                                              objective = objective,)
+            rets_t,turns_t,shorts_t,weights_t,a2t = train(
+                model_t,
+                preprocess = preprocess,
+                data_train = data_train_t, 
+                data_dev = data_test_t,  # dev dataset isn't used as we don't do any validation tuning, so test dataset goes here for progress reporting
+                residual_weights_train = residual_weights_train_t, 
+                residual_weights_dev = residual_weights_test_t,  # dev dataset isn't used as we don't do any validation tuning, so test dataset goes here for progress reporting
+                log_dev_progress_freq = log_dev_progress_freq, 
+                num_epochs = num_epochs, 
+                force_retrain = force_retrain,
+                optimizer_name = config['optimizer_name'],
+                optimizer_opts = config['optimizer_opts'],
+                early_stopping = early_stopping,
+                save_params = save_params, 
+                output_path = output_path, 
+                model_tag = model_tag_t,
+                device = device, 
+                lookback = lookback, 
+                log_plot_freq = log_plot_freq, 
+                parallelize = parallelize, 
+                device_ids = device_ids, 
+                batchsize = batchsize,
+                trans_cost = trans_cost,
+                hold_cost = hold_cost,
+                objective = objective,)
             logging.debug("train() completed")
         else:
             rets_t,_,_,turns_t,shorts_t,weights_t,a2t = get_returns(model_t,
