@@ -123,7 +123,7 @@ def run(config:dict,
         #residual_weightsNames += [f"{cwd}/residuals/ff-universe-residuals/ff-universe-transition-matrices_{factor}_factors_1998_initialOOSYear_60_rollingWindow_0.01_Cap.npy" ]
 
     # load dates
-    dates_filepath = './data/F-F_Research_Data_5_Factors_2x3_daily.CSV'
+    dates_filepath = './data/F-F_Research_Data_5_Factors_2x3_daily.CSV.zip'
     if not os.path.exists(dates_filepath):
         ff5 = pd.read_csv("https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip", header=2, index_col=0)
         ff5.to_csv(dates_filepath)
