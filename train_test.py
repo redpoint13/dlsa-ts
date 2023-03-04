@@ -235,6 +235,7 @@ def train(model,
                          + dev_loss_description)   
             
             if early_stopping:
+                model.random_seed = 8888
                 if dev_loss < min_dev_loss:
                     patience = 0
                     min_dev_loss = dev_loss
