@@ -61,8 +61,8 @@ class FamaFrench:
                 if self.dailyDates[t+firstOOSDailyIdx-1].month != self.dailyDates[t+firstOOSDailyIdx].month:
                     monthlyIdx +=1 
                 idxsNotMissingValues = ~np.any(np.isnan(Rdaily[(t+firstOOSDailyIdx-sizeWindow):(t+firstOOSDailyIdx),:]), axis = 0).ravel()                     
-                #print(idxsNotMissingValues.shape,mask[monthlyIdx,:].shape)
-                #print(self.monthlyDates[monthlyIdx],OOSDailyDates[t])
+                print(idxsNotMissingValues.shape,mask[monthlyIdx,:].shape)
+                print(self.monthlyDates[monthlyIdx],OOSDailyDates[t])
                 idxsSelected = idxsNotMissingValues * mask[monthlyIdx,:]
                 notmissingOOS[t]=np.sum(idxsNotMissingValues)
                 
