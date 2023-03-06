@@ -1,7 +1,7 @@
 import dtale
 import pandas as pd
 
-df = pd.read_csv('/com.docker.devenvironments.code/data/RetChar.csv').sample(frac=0.025)
+df = pd.read_csv("/com.docker.devenvironments.code/data/RetChar.csv").sample(frac=0.025)
 
 # Assigning a reference to a running D-Tale process
 d = dtale.show(df)
@@ -23,6 +23,8 @@ d.open_browser()
 d._data_id  # the process's data identifier
 d._url  # the url to access the process
 
-d2 = dtale.get_instance(d._data_id)  # returns a new reference to the instance running at that data_id
+d2 = dtale.get_instance(
+    d._data_id
+)  # returns a new reference to the instance running at that data_id
 
 dtale.instances()  # prints a list of all ids & urls of running D-Tale sessions
